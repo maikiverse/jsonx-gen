@@ -1,0 +1,42 @@
+{
+    "metadata": {
+        "version": "1.0",
+        "created_at": "2024-03-20",
+        "keyword1": "metadata_value"
+    },
+    "users": [
+        {
+            "id": 1,
+            "profile": {
+                "name": "John Doe",
+                "contact": {
+                    "email": "john@example.com",
+                    "phone": "123-456-7890"
+                }
+            },
+            "keyword1_settings": {
+                "name": "keyword2",
+                "theme": "dark",
+                "notifications": true
+            }
+        }
+    ],
+    "departments": {
+        "engineering": {
+            "head": "Alice Johnson",
+            "team": {
+                "members": [
+                    "Bob Wilson",
+                    "Carol Brown"
+                ],
+                "projects": [
+                    {
+                        "name": "Project Alpha",
+                        "status": "active",
+                        "keyword2": "final_value"
+                    }
+                ]
+            }
+        }
+    }
+} 
