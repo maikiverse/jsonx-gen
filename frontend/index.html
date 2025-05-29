@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>JSON Path Extractor</title>
+</head>
+<body>
+  <h2>JSON Path Extractor</h2>
+
+  <textarea id="json" rows="12" cols="100" placeholder="Paste your JSON here..."></textarea><br>
+  <input id="keywords" placeholder="comma,separated,keywords">
+  <select id="mode">
+    <option value="match">match</option>
+    <option value="contains">contains</option>
+    <option value="startswith">startswith</option>
+  </select>
+  <select id="language">
+    <option value="">Select language</option>
+    <option value="python">Python</option>
+    <option value="javascript">JavaScript</option>
+    <option value="mysql">MySQL</option>
+    <option value="spark_sql">Spark SQL</option>
+    <option value="php">PHP</option>
+    <option value="pyspark">PySpark</option>
+  </select>
+  <button onclick="extract()">Generate</button>
+
+  <h3>Result:</h3>
+  <pre id="result" style="background:#f4f4f4; padding:1em; border:1px solid #ccc;"></pre>
+
+  <script>
+    async function extract() {
+      try {
+        const jsonText = document.getElementById("json").value;
+        const jsonObj = JSON.parse(jsonText);
+        const keywords = document.getElementById("keywords").value.split(",").map(k => k.trim()).filter(Boolean);
+        const mode = document.getElementById("mode").value;
+        const language = document.getElementById("language").value;
+
+        const query = new URLSearchParams();
+        keywords.forEach(k => query.append("keywords", k));
+        query.append("mode", mode);
+        if (language) query.append("language", language);
+
+        const response = await fetch(`/extract?${query.toString()}`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ json_obj: jsonObj })
+        });
+
+        const data = await response.json();
+        document.getElementById("result").textContent = data.code;
+      } catch (err) {
+        document.getElementById("result").textContent = "Error: " + err.message;
+      }
+    }
+  </script>
+</body>
+</html>

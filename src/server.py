@@ -1,83 +1,56 @@
-"""
-FastAPI server for JSON extraction code generation.
-"""
+from fastapi import FastAPI, Query, Request
+from pydantic import BaseModel
+from typing import List, Optional, Union, Dict, Any
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse, JSONResponse
+from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Query
-from pydantic import BaseModel, Field
-from typing import List, Optional
-from .core import generate_extraction_code
+from src.core import generate_extraction_code
 
-app = FastAPI(
-    title="JSONXGen API",
-    description="API for generating extraction code from JSON schemas",
-    version="0.1.0"
-)
+app = FastAPI()
 
-class JsonInput(BaseModel):
-    """
-    Request model for JSON input.
-    """
-    json_input: str = Field(
-        default='{"metadata": {"version": "1.0", "created_at": "2024-03-20", "keyword1": "metadata_value"}}',
-        description="JSON string or file path to analyze"
-    )
 
-@app.post("/generate")
-async def generate_code(
-    request: JsonInput,
-    keywords: List[str] = Query(
-        default=["keyword1", "keyword2"],
-        description="List of keywords to search for in the JSON structure"
-    ),
-    mode: str = Query(
-        default="match",
-        description="Matching mode: 'match' (exact), 'contains' (substring), or 'startswith' (prefix)",
-        choices=["match", "contains", "startswith"]
-    ),
-    language: str = Query(
-        default="python",
-        description="Target programming language for the generated code",
-        examples=["python", "mysql", "spark sql", "php", "pyspark"]
-    )
+# Mount static files to /static instead of root
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
+
+class ExtractionRequest(BaseModel):
+    json_obj: Union[Dict[str, Any], List[Any], str]
+
+@app.get("/")
+async def read_root():
+    """Serve the main HTML page."""
+    with open("frontend/index.html") as f:
+        return HTMLResponse(content=f.read())
+
+@app.post("/extract")
+async def extract(
+    request: ExtractionRequest,
+    keywords: List[str] = Query(...),
+    mode: str = Query("match", enum=["match", "contains", "startswith"]),
+    language: Optional[str] = Query(None)
 ):
     """
-    Generate extraction code from JSON input.
+    Extract paths from JSON based on keywords and generate code.
     
     Args:
-        request: JsonInput containing the JSON string or file path
+        request: The JSON object to analyze
         keywords: List of keywords to search for
-        mode: Matching mode for keywords
-        language: Target programming language
+        mode: Matching mode (match, contains, startswith)
+        language: Target language for code generation
         
     Returns:
-        dict: Generated code
-        
-    Raises:
-        HTTPException: If there's an error processing the request
+        JSONResponse: Generated code
     """
     try:
         code = generate_extraction_code(
-            request.json_input,
-            keywords,
-            mode,
-            language
+            json_input=request.json_obj,
+            keywords=keywords,
+            mode=mode,
+            target_language=language
         )
-        return {"code": code}
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        return JSONResponse(content={"code": code})
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/")
-async def root():
-    """Root endpoint returning API information."""
-    return {
-        "name": "JSONXGen API",
-        "version": "0.1.0",
-        "description": "API for generating extraction code from JSON schemas",
-        "endpoints": {
-            "/generate": "POST - Generate extraction code",
-            "/docs": "GET - API documentation (Swagger UI)",
-            "/redoc": "GET - API documentation (ReDoc)"
-        }
-    } 
+        return JSONResponse(
+            status_code=400,
+            content={"error": str(e)}
+        )
