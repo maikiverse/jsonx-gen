@@ -11,7 +11,7 @@ def get_matcher(mode: str) -> Callable[[str, str], bool]:
     Get the appropriate matching function based on the mode.
     
     Args:
-        mode (str): One of 'match', 'contains', or 'startswith'
+        mode (str): One of 'match', 'contains', 'startswith', or 'endswith'
         
     Returns:
         Callable[[str, str], bool]: A function that takes two strings and returns True if they match
@@ -26,8 +26,10 @@ def get_matcher(mode: str) -> Callable[[str, str], bool]:
         return lambda x, y: y.lower() in x.lower()
     elif mode == 'startswith':
         return lambda x, y: x.lower().startswith(y.lower())
+    elif mode == 'endswith':
+        return lambda x, y: x.lower().endswith(y.lower())
     else:
-        raise ValueError(f"Unsupported mode: {mode}. Must be one of: match, contains, startswith") 
+        raise ValueError(f"Unsupported mode: {mode}. Must be one of: match, contains, startswith, endswith") 
 
 
 def parse_json_input(json_input: str) -> Union[Dict, List]:

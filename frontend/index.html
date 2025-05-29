@@ -2,17 +2,19 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>JSON Path Extractor</title>
+  <title>JSON Xtract Generator</title>
 </head>
 <body>
-  <h2>JSON Path Extractor</h2>
+  <h2>JSON eXtract GENerator</h2>
+  <p>Search JSON object for keywords and generate extraction code for all matching paths:</p>
 
   <textarea id="json" rows="12" cols="100" placeholder="Paste your JSON here..."></textarea><br>
-  <input id="keywords" placeholder="comma,separated,keywords">
+  <input id="keywords" placeholder="comma,separated,keywords"> <br>
   <select id="mode">
     <option value="match">match</option>
     <option value="contains">contains</option>
     <option value="startswith">startswith</option>
+    <option value="endswith">endswith</option>
   </select>
   <select id="language">
     <option value="">Select language</option>

@@ -26,4 +26,7 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.7",
+    package_data={
+        'jsonxgen': ['py.typed'],
+    },
 ) 

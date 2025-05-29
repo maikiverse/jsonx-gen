@@ -35,9 +35,9 @@ Examples:
     )
     parser.add_argument(
         '--mode',
-        choices=['match', 'contains', 'startswith'],
+        choices=['match', 'contains', 'startswith', 'endswith'],
         default='match',
-        help='Matching mode: match (exact), contains (substring), or startswith (prefix)'
+        help='Matching mode: match (exact), contains (substring), startswith (prefix), or endswith (suffix)'
     )
     parser.add_argument(
         '--language',

@@ -26,7 +26,7 @@ async def read_root():
 async def extract(
     request: ExtractionRequest,
     keywords: List[str] = Query(...),
-    mode: str = Query("match", enum=["match", "contains", "startswith"]),
+    mode: str = Query("match", enum=["match", "contains", "startswith", "endswith"]),
     language: Optional[str] = Query(None)
 ):
     """
@@ -35,7 +35,7 @@ async def extract(
     Args:
         request: The JSON object to analyze
         keywords: List of keywords to search for
-        mode: Matching mode (match, contains, startswith)
+        mode: Matching mode (match, contains, startswith, endswith)
         language: Target language for code generation
         
     Returns:
