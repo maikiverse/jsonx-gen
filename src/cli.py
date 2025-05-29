@@ -40,6 +40,12 @@ Examples:
         help='Matching mode: match (exact), contains (substring), startswith (prefix), or endswith (suffix)'
     )
     parser.add_argument(
+        '--type',
+        choices=['all', 'key', 'value'],
+        default='all',
+        help='What to match: all (both keys and values), key (only keys), or value (only values)'
+    )
+    parser.add_argument(
         '--language',
         default='python',
         help='Target language for the extraction code (default: python)'

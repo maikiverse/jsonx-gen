@@ -61,14 +61,20 @@ def parse_json_input(json_input: str) -> Union[Dict, List]:
             e.pos
         )
 
-def extract_json_path(json_obj: Union[Dict, List], keywords: List[str], mode: str = 'match') -> Dict[str, List[List[Union[str, int]]]]:
+def extract_json_path(
+    json_obj: Union[Dict, List], 
+    keywords: List[str], 
+    mode: str = 'match',
+    type: str = 'all'
+) -> Dict[str, List[List[Union[str, int]]]]:
     """
     Extract paths from a JSON object that match the given keywords.
     
     Args:
         json_obj (Union[Dict, List]): The JSON object to analyze
         keywords (List[str]): List of keywords to search for in keys and values
-        mode (str): Matching mode ('match', 'contains', or 'startswith')
+        mode (str): Matching mode ('match', 'contains', 'startswith', or 'endswith')
+        type (str): What to match ('all', 'key', or 'value')
         
     Returns:
         Dict[str, List[List[Union[str, int]]]]: Dictionary mapping keywords (with extensions for multiple matches) to their paths in the JSON structure
@@ -95,11 +101,11 @@ def extract_json_path(json_obj: Union[Dict, List], keywords: List[str], mode: st
             for k, v in obj.items():
                 for keyword in keywords:
                     # Check if keyword matches the key
-                    if matcher(str(k), keyword):
+                    if type in ['all', 'key'] and matcher(str(k), keyword):
                         key = get_key_with_extension(keyword)
                         matches.setdefault(key, []).append(path + [k])
                     # Check if keyword matches the value (for primitive types)
-                    if isinstance(v, (str, int, float)) and matcher(str(v), keyword):
+                    if type in ['all', 'value'] and isinstance(v, (str, int, float)) and matcher(str(v), keyword):
                         key = get_key_with_extension(keyword)
                         matches.setdefault(key, []).append(path + [k])
                 search(v, path + [k])
@@ -115,6 +121,7 @@ def generate_extraction_code(
     json_input: Union[str, Dict, List],
     keywords: List[str],
     mode: str = 'match',
+    type: str = 'all',
     target_language: Optional[str] = None
 ) -> str:
     """
@@ -123,23 +130,49 @@ def generate_extraction_code(
     Args:
         json_input: Either a JSON string, file path, or parsed JSON object
         keywords: List of keywords to search for
-        mode: Matching mode ('match', 'contains', or 'startswith')
+        mode: Matching mode ('match', 'contains', 'startswith', or 'endswith')
+        type: What to match ('all', 'key', or 'value')
         target_language: Target language for the code (None for Python)
         
     Returns:
         str: Generated extraction code in the target language
+        
+    Raises:
+        ValueError: If any of the input parameters are invalid
     """
+    # Validate input parameters
+    if not isinstance(keywords, list) or not keywords:
+        raise ValueError("keywords must be a non-empty list")
+    
+    if not all(isinstance(k, str) for k in keywords):
+        raise ValueError("all keywords must be strings")
+    
+    if mode not in ['match', 'contains', 'startswith', 'endswith']:
+        raise ValueError(f"Invalid mode: {mode}. Must be one of: match, contains, startswith, endswith")
+    
+    if type not in ['all', 'key', 'value']:
+        raise ValueError(f"Invalid type: {type}. Must be one of: all, key, value")
+    
     # Parse JSON if it's a string
     if isinstance(json_input, str):
-        json_obj = parse_json_input(json_input)
+        try:
+            json_obj = parse_json_input(json_input)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Invalid JSON input: {str(e)}")
     else:
         json_obj = json_input
     
     # Extract paths
-    matches = extract_json_path(json_obj, keywords, mode)
+    matches = extract_json_path(json_obj, keywords, mode, type)
+    
+    if not matches:
+        return "# No matches found for the given keywords"
     
     # Get the appropriate generator and generate code
     from .code_generator_registry import CodeGeneratorRegistry
     language = target_language or 'python'
-    generator = CodeGeneratorRegistry.get_generator(language)
-    return generator(matches) 
+    try:
+        generator = CodeGeneratorRegistry.get_generator(language)
+        return generator(matches)
+    except ValueError as e:
+        raise ValueError(f"Error generating code: {str(e)}") 

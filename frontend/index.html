@@ -3,28 +3,82 @@
 <head>
   <meta charset="UTF-8">
   <title>JSON Xtract Generator</title>
+  <style>
+    .input-group {
+      margin: 10px 0;
+    }
+    .input-group input, .input-group textarea {
+      width: 60%;
+      box-sizing: border-box;
+    }
+    .select-group {
+      margin: 10px 0;
+      display: flex;
+      gap: 20px;
+      align-items: flex-end;
+    }
+    .select-container {
+      display: flex;
+      flex-direction: column;
+    }
+    .select-container label {
+      font-size: 0.8em;
+      color: #666;
+      margin-bottom: 4px;
+    }
+    .select-container select {
+      min-width: 120px;
+    }
+    button {
+      padding: 5px 15px;
+      margin-left: 10px;
+    }
+  </style>
 </head>
 <body>
   <h2>JSON eXtract GENerator</h2>
   <p>Search JSON object for keywords and generate extraction code for all matching paths:</p>
 
-  <textarea id="json" rows="12" cols="100" placeholder="Paste your JSON here..."></textarea><br>
-  <input id="keywords" placeholder="comma,separated,keywords"> <br>
-  <select id="mode">
-    <option value="match">match</option>
-    <option value="contains">contains</option>
-    <option value="startswith">startswith</option>
-    <option value="endswith">endswith</option>
-  </select>
-  <select id="language">
-    <option value="">Select language</option>
-    <option value="python">Python</option>
-    <option value="javascript">JavaScript</option>
-    <option value="mysql">MySQL</option>
-    <option value="spark_sql">Spark SQL</option>
-    <option value="php">PHP</option>
-    <option value="pyspark">PySpark</option>
-  </select>
+  <div class="select-group">
+    <div class="select-container">
+      <label for="mode">Match Mode</label>
+      <select id="mode">
+        <option value="match">match</option>
+        <option value="contains">contains</option>
+        <option value="startswith">startswith</option>
+        <option value="endswith">endswith</option>
+      </select>
+    </div>
+
+    <div class="select-container">
+      <label for="type">Match Type</label>
+      <select id="type">
+        <option value="all">all</option>
+        <option value="key">key</option>
+        <option value="value">value</option>
+      </select>
+    </div>
+
+    <div class="select-container">
+      <label for="language">Language</label>
+      <select id="language">
+        <option value="javascript">JavaScript</option>
+        <option value="mysql">MySQL</option>
+        <option value="php">PHP</option>
+        <option value="python">Python</option>
+        <option value="pyspark">PySpark</option>
+        <option value="spark_sql">Spark SQL</option>
+      </select>
+    </div>
+
+   
+  </div>
+  <div class="input-group">
+    <textarea id="json" rows="12" placeholder="Paste your JSON here..."></textarea>
+  </div>
+  <div class="input-group">
+    <input id="keywords" placeholder="comma,separated,keywords">
+  </div>
   <button onclick="extract()">Generate</button>
 
   <h3>Result:</h3>
@@ -34,15 +88,31 @@
     async function extract() {
       try {
         const jsonText = document.getElementById("json").value;
-        const jsonObj = JSON.parse(jsonText);
+        if (!jsonText.trim()) {
+          throw new Error("Please enter JSON input");
+        }
+
+        let jsonObj;
+        try {
+          jsonObj = JSON.parse(jsonText);
+        } catch (e) {
+          throw new Error(`Invalid JSON: ${e.message}`);
+        }
+
         const keywords = document.getElementById("keywords").value.split(",").map(k => k.trim()).filter(Boolean);
+        if (keywords.length === 0) {
+          throw new Error("Please enter at least one keyword");
+        }
+
         const mode = document.getElementById("mode").value;
+        const type = document.getElementById("type").value;
         const language = document.getElementById("language").value;
 
         const query = new URLSearchParams();
         keywords.forEach(k => query.append("keywords", k));
         query.append("mode", mode);
-        if (language) query.append("language", language);
+        query.append("type", type);
+        query.append("language", language);
 
         const response = await fetch(`/extract?${query.toString()}`, {
           method: 'POST',
@@ -51,6 +121,11 @@
         });
 
         const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Server error');
+        }
+
         document.getElementById("result").textContent = data.code;
       } catch (err) {
         document.getElementById("result").textContent = "Error: " + err.message;
