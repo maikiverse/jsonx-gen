@@ -162,6 +162,8 @@ def generate_extraction_code(
     else:
         json_obj = json_input
     
+    print('json_obj', json_obj)
+    print('keywords', keywords)
     # Extract paths
     matches = extract_json_path(json_obj, keywords, mode, type)
     
