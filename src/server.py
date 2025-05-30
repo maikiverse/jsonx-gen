@@ -104,14 +104,9 @@ async def extract_get(
         
         # Parse keywords from comma-separated string
         keyword_list = [k.strip() for k in keywords.split(',')]
-        logger.info(f"Parsed keywords: {keyword_list}")
-
-        # Parse JSON from file or URL
-        json_obj = parse_json_input(file_path)
-        logger.info(f"Parsed JSON object: {json_obj}")
 
         code = generate_extraction_code(
-            json_input=json_obj,
+            json_input=file_path,
             keywords=keyword_list,
             mode=mode,
             type=type,
