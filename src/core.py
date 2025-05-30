@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 
 # Define threshold for large files (10MB)
 LARGE_FILE_THRESHOLD = 10 * 1024 * 1024  # 10MB in bytes
-LARGE_FILE_THRESHOLD = 10
+# LARGE_FILE_THRESHOLD = 10
 
 
 
@@ -114,7 +114,13 @@ def extract_json_path_streaming(
     def parse_prefix_to_path(prefix: str) -> List[Union[str, int]]:
         path: List[Union[str, int]] = []
         for part in prefix.split('.'):
-            if part.isdigit():
+            # convert ijson 'item' into array index if numeric
+            if part == 'item':
+                if path and isinstance(path[-1], int):
+                    path[-1] += 1
+                else:
+                    path.append(0)
+            elif part.isdigit():
                 path.append(int(part))
             else:
                 path.append(part)
