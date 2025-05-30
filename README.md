@@ -13,14 +13,17 @@ pip install jsonxgen
 ### Command Line Interface
 
 ```bash
-# Generate Python extraction code from a file (exact match)
+# Generate Python extraction code from a local file (exact match)
 jsonxgen --keywords "name,email" --mode match data.json
+
+# Generate Python extraction code from a URL (contains)
+jsonxgen --keywords "name" --mode contains "https://api.example.com/data.json"
 
 # Generate Python extraction code from a JSON string (contains)
 jsonxgen --keywords "name" --mode contains '{"user": {"name": "John"}}'
 
-# Generate MySQL extraction code from a file (starts with)
-jsonxgen --keywords "name,email" --language mysql --mode startswith data.json
+# Generate MySQL extraction code from a URL (starts with)
+jsonxgen --keywords "name,email" --language mysql --mode startswith "https://api.example.com/data.json"
 
 # Generate Spark SQL extraction code from a JSON string (exact match)
 jsonxgen --keywords "name" --language "spark sql" '{"user": {"name": "John"}}'
@@ -40,8 +43,9 @@ The API will be available at:
 - Swagger UI: http://localhost:8000/docs
 - ReDoc: http://localhost:8000/redoc
 
-Example API request:
+Example API requests:
 ```bash
+# Using a local file
 curl -X POST "http://localhost:8000/extract" \
      -H "Content-Type: application/json" \
      -d '{
@@ -51,7 +55,17 @@ curl -X POST "http://localhost:8000/extract" \
            "type": "all",
            "language": "python"
          }'
+
+# Using a URL
+curl "http://localhost:8000/extract?file_path=https://api.example.com/data.json&keywords=name,email&mode=match&type=all"
 ```
+
+## Supported Input Sources
+
+- Local JSON files
+- URLs pointing to JSON data
+- JSON strings
+- JSON objects (in API requests)
 
 ## Supported Languages
 
@@ -75,7 +89,7 @@ curl -X POST "http://localhost:8000/extract" \
   - `value`: Match only values
 - Command-line interface
 - REST API with Swagger documentation
-- Support for both file and JSON string input
+- Support for multiple input sources (files, URLs, strings)
 
 ## Development
 

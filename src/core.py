@@ -4,7 +4,9 @@ Core functionality for JSON extraction code generation.
 
 import json
 import os
+import requests
 from typing import Any, Dict, List, Union, Callable, Optional
+from urllib.parse import urlparse
 
 def get_matcher(mode: str) -> Callable[[str, str], bool]:
     """
@@ -31,13 +33,28 @@ def get_matcher(mode: str) -> Callable[[str, str], bool]:
     else:
         raise ValueError(f"Unsupported mode: {mode}. Must be one of: match, contains, startswith, endswith") 
 
+def is_valid_url(url: str) -> bool:
+    """
+    Check if a string is a valid URL.
+    
+    Args:
+        url (str): The URL to validate
+        
+    Returns:
+        bool: True if the URL is valid, False otherwise
+    """
+    try:
+        result = urlparse(url)
+        return all([result.scheme, result.netloc])
+    except:
+        return False
 
 def parse_json_input(json_input: str) -> Union[Dict, List]:
     """
-    Parse JSON input from either a file path or a JSON string.
+    Parse JSON input from either a file path, URL, or a JSON string.
     
     Args:
-        json_input (str): Either a path to a JSON file or a JSON string
+        json_input (str): Either a path to a JSON file, a URL, or a JSON string
         
     Returns:
         Union[Dict, List]: Parsed JSON object
@@ -45,8 +62,19 @@ def parse_json_input(json_input: str) -> Union[Dict, List]:
     Raises:
         FileNotFoundError: If the input is a file path and the file doesn't exist
         json.JSONDecodeError: If the input is invalid JSON
+        requests.RequestException: If there's an error fetching from URL
+        ValueError: If the input is neither a valid file path, URL, nor JSON string
     """
-    # Check if the input looks like a file path
+    # Check if the input is a URL
+    if is_valid_url(json_input):
+        try:
+            response = requests.get(json_input)
+            response.raise_for_status()  # Raise an exception for bad status codes
+            return response.json()
+        except requests.RequestException as e:
+            raise ValueError(f"Error fetching JSON from URL: {str(e)}")
+    
+    # Check if the input is a file path
     if os.path.isfile(json_input):
         with open(json_input, 'r') as f:
             return json.load(f)
@@ -56,7 +84,7 @@ def parse_json_input(json_input: str) -> Union[Dict, List]:
         return json.loads(json_input)
     except json.JSONDecodeError as e:
         raise json.JSONDecodeError(
-            f"Invalid JSON string: {str(e)}. If you meant to provide a file path, make sure the file exists.",
+            f"Invalid JSON string: {str(e)}. If you meant to provide a file path or URL, make sure it exists and is accessible.",
             e.doc,
             e.pos
         )

@@ -7,7 +7,8 @@ setup(
     install_requires=[
         "fastapi>=0.68.0",
         "uvicorn>=0.15.0",
-        "pydantic>=1.8.0"
+        "pydantic>=1.8.0",
+        "requests>=2.31.0"
     ],
     entry_points={
         'console_scripts': [
