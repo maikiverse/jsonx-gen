@@ -5,8 +5,15 @@ Core functionality for JSON extraction code generation.
 import json
 import os
 import requests
-from typing import Any, Dict, List, Union, Callable, Optional
+import ijson
+from typing import Any, Dict, List, Union, Callable, Optional, Tuple
 from urllib.parse import urlparse
+
+# Define threshold for large files (10MB)
+LARGE_FILE_THRESHOLD = 10 * 1024 * 1024  # 10MB in bytes
+LARGE_FILE_THRESHOLD = 10
+
+
 
 def get_matcher(mode: str) -> Callable[[str, str], bool]:
     """
@@ -31,7 +38,7 @@ def get_matcher(mode: str) -> Callable[[str, str], bool]:
     elif mode == 'endswith':
         return lambda x, y: x.lower().endswith(y.lower())
     else:
-        raise ValueError(f"Unsupported mode: {mode}. Must be one of: match, contains, startswith, endswith") 
+        raise ValueError(f"Unsupported mode: {mode}. Must be one of: match, contains, startswith, endswith")
 
 def is_valid_url(url: str) -> bool:
     """
@@ -89,6 +96,51 @@ def parse_json_input(json_input: str) -> Union[Dict, List]:
             e.pos
         )
 
+def extract_json_path_streaming(
+    file_path: str,
+    keywords: List[str],
+    mode: str = 'match',
+    type: str = 'all'
+) -> Dict[str, List[List[Union[str, int]]]]:
+    matches: Dict[str, List[List[Union[str, int]]]] = {}
+    keyword_counts: Dict[str, int] = {k: 0 for k in keywords}
+    matcher = get_matcher(mode)
+
+    def get_key_with_extension(keyword: str) -> str:
+        count = keyword_counts[keyword]
+        keyword_counts[keyword] += 1
+        return f"{keyword}_{count}" if count > 0 else keyword
+
+    def parse_prefix_to_path(prefix: str) -> List[Union[str, int]]:
+        path: List[Union[str, int]] = []
+        for part in prefix.split('.'):
+            if part.isdigit():
+                path.append(int(part))
+            else:
+                path.append(part)
+        return path
+
+    with open(file_path, 'rb') as f:
+        parser = ijson.parse(f)
+
+        for prefix, event, value in parser:
+            path = parse_prefix_to_path(prefix)
+
+            if event == 'map_key':
+                if type in ['all', 'key']:
+                    for keyword in keywords:
+                        if matcher(str(value), keyword):
+                            key = get_key_with_extension(keyword)
+                            matches.setdefault(key, []).append(path + [value])
+            elif event in ('string', 'number'):
+                if type in ['all', 'value']:
+                    for keyword in keywords:
+                        if matcher(str(value), keyword):
+                            key = get_key_with_extension(keyword)
+                            matches.setdefault(key, []).append(path)
+
+    return matches
+
 def extract_json_path(
     json_obj: Union[Dict, List], 
     keywords: List[str], 
@@ -105,7 +157,7 @@ def extract_json_path(
         type (str): What to match ('all', 'key', or 'value')
         
     Returns:
-        Dict[str, List[List[Union[str, int]]]]: Dictionary mapping keywords (with extensions for multiple matches) to their paths in the JSON structure
+        Dict[str, List[List[Union[str, int]]]]: Dictionary mapping keywords to their paths
     """
     matches: Dict[str, List[List[Union[str, int]]]] = {}
     keyword_counts: Dict[str, int] = {k: 0 for k in keywords}
@@ -181,17 +233,29 @@ def generate_extraction_code(
     if type not in ['all', 'key', 'value']:
         raise ValueError(f"Invalid type: {type}. Must be one of: all, key, value")
     
-    # Parse JSON if it's a string
-    if isinstance(json_input, str):
-        try:
-            json_obj = parse_json_input(json_input)
-        except json.JSONDecodeError as e:
-            raise ValueError(f"Invalid JSON input: {str(e)}")
+    # Determine if we should use streaming for file input
+    if isinstance(json_input, str) and os.path.isfile(json_input):
+        file_size = os.path.getsize(json_input)
+        if file_size > LARGE_FILE_THRESHOLD:
+            # Use streaming for large files
+            matches = extract_json_path_streaming(json_input, keywords, mode, type)
+        else:
+            # Use regular parsing for smaller files
+            try:
+                json_obj = parse_json_input(json_input)
+                matches = extract_json_path(json_obj, keywords, mode, type)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Invalid JSON input: {str(e)}")
     else:
-        json_obj = json_input
-    
-    # Extract paths
-    matches = extract_json_path(json_obj, keywords, mode, type)
+        # Handle non-file inputs (URLs, JSON strings, or parsed objects)
+        if isinstance(json_input, str):
+            try:
+                json_obj = parse_json_input(json_input)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Invalid JSON input: {str(e)}")
+        else:
+            json_obj = json_input
+        matches = extract_json_path(json_obj, keywords, mode, type)
     
     if not matches:
         return "# No matches found for the given keywords"
