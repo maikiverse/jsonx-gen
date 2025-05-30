@@ -14,24 +14,26 @@ def main():
         epilog="""
 Examples:
   Generate Python extraction code from a file (exact match):
-    jsonpathxgen --keywords name email --mode match data.json
+    jsonxgen --keywords "name,email" --mode match data.json
 
   Generate Python extraction code from a JSON string (contains):
-    jsonpathxgen --keywords name --mode contains '{"user": {"name": "John"}}'
+    jsonxgen --keywords "name" --mode contains '{"user": {"name": "John"}}'
 
   Generate MySQL extraction code from a file (starts with):
-    jsonpathxgen --keywords name email --language mysql --mode startswith data.json
+    jsonxgen --keywords "name,email" --language mysql --mode startswith data.json
 
   Generate Spark SQL extraction code from a JSON string (exact match):
-    jsonpathxgen --keywords name --language "spark sql" '{"user": {"name": "John"}}'
+    jsonxgen --keywords "name" --language "spark sql" '{"user": {"name": "John"}}'
+
+  Generate code matching only keys (endswith):
+    jsonxgen --keywords "id" --mode endswith --type key data.json
         """
     )
     
     parser.add_argument(
         '--keywords',
-        nargs='+',
         required=True,
-        help='Keywords to search for in the JSON'
+        help='Comma-separated list of keywords to search for in the JSON'
     )
     parser.add_argument(
         '--mode',
@@ -58,10 +60,14 @@ Examples:
     args = parser.parse_args()
     
     try:
+        # Split keywords by comma and strip whitespace
+        keywords = [k.strip() for k in args.keywords.split(',')]
+        
         code = generate_extraction_code(
             args.json_input,
-            args.keywords,
+            keywords,
             args.mode,
+            args.type,
             args.language
         )
         print(code)

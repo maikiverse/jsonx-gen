@@ -14,16 +14,19 @@ pip install jsonxgen
 
 ```bash
 # Generate Python extraction code from a file (exact match)
-jsonxgen --keywords name email --mode match data.json
+jsonxgen --keywords "name,email" --mode match data.json
 
 # Generate Python extraction code from a JSON string (contains)
-jsonxgen --keywords name --mode contains '{"user": {"name": "John"}}'
+jsonxgen --keywords "name" --mode contains '{"user": {"name": "John"}}'
 
 # Generate MySQL extraction code from a file (starts with)
-jsonxgen --keywords name email --language mysql --mode startswith data.json
+jsonxgen --keywords "name,email" --language mysql --mode startswith data.json
 
 # Generate Spark SQL extraction code from a JSON string (exact match)
-jsonxgen --keywords name --language "spark sql" '{"user": {"name": "John"}}'
+jsonxgen --keywords "name" --language "spark sql" '{"user": {"name": "John"}}'
+
+# Generate code matching only keys (endswith)
+jsonxgen --keywords "id" --mode endswith --type key data.json
 ```
 
 ### REST API
@@ -39,12 +42,13 @@ The API will be available at:
 
 Example API request:
 ```bash
-curl -X POST "http://localhost:8000/generate" \
+curl -X POST "http://localhost:8000/extract" \
      -H "Content-Type: application/json" \
      -d '{
-           "json_input": "{\"user\": {\"name\": \"John\"}}",
+           "json_obj": {"user": {"name": "John"}},
            "keywords": ["name"],
            "mode": "match",
+           "type": "all",
            "language": "python"
          }'
 ```
@@ -64,6 +68,11 @@ curl -X POST "http://localhost:8000/generate" \
   - `match`: Exact match
   - `contains`: Substring match
   - `startswith`: Prefix match
+  - `endswith`: Suffix match
+- Different match types:
+  - `all`: Match both keys and values
+  - `key`: Match only keys
+  - `value`: Match only values
 - Command-line interface
 - REST API with Swagger documentation
 - Support for both file and JSON string input

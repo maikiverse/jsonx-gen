@@ -80,7 +80,7 @@ async def extract_post(request: ExtractionRequest):
 @app.get("/extract")
 async def extract_get(
     file_path: str = Query(...),
-    keywords: List[str] = Query(...),
+    keywords: str = Query(..., description="Comma-separated list of keywords"),
     mode: str = Query("match", enum=["match", "contains", "startswith", "endswith"]),
     type: str = Query("all", enum=["all", "key", "value"]),
     language: Optional[str] = Query(None)
@@ -91,7 +91,7 @@ async def extract_get(
     
     Args:
         file_path: Path to the JSON file or URL
-        keywords: List of keywords to search for
+        keywords: Comma-separated list of keywords to search for
         mode: Matching mode (match, contains, startswith, endswith)
         type: What to match (all, key, or value)
         language: Target language for code generation
@@ -101,6 +101,10 @@ async def extract_get(
     """
     try:
         logger.info(f"Received GET request with file_path: {file_path}, keywords: {keywords}, mode: {mode}, type: {type}, language: {language}")
+        
+        # Parse keywords from comma-separated string
+        keyword_list = [k.strip() for k in keywords.split(',')]
+        logger.info(f"Parsed keywords: {keyword_list}")
 
         # Parse JSON from file or URL
         json_obj = parse_json_input(file_path)
@@ -108,7 +112,7 @@ async def extract_get(
 
         code = generate_extraction_code(
             json_input=json_obj,
-            keywords=keywords,
+            keywords=keyword_list,
             mode=mode,
             type=type,
             target_language=language
