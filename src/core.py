@@ -5,13 +5,13 @@ Core functionality for JSON extraction code generation.
 import json
 import os
 import requests
-import ijson
+import json_stream
 from typing import Any, Dict, List, Union, Callable, Optional, Tuple
 from urllib.parse import urlparse
 
 # Define threshold for large files (10MB)
 LARGE_FILE_THRESHOLD = 10 * 1024 * 1024  # 10MB in bytes
-# LARGE_FILE_THRESHOLD = 10
+LARGE_FILE_THRESHOLD = 10
 
 
 
@@ -96,54 +96,72 @@ def parse_json_input(json_input: str) -> Union[Dict, List]:
             e.pos
         )
 
+
+
 def extract_json_path_streaming(
     file_path: str,
     keywords: List[str],
     mode: str = 'match',
     type: str = 'all'
 ) -> Dict[str, List[List[Union[str, int]]]]:
+    """
+    Extract paths from a streaming JSON file that match the given keywords.
+
+    Args:
+        file_path (str): Path to the JSON file
+        keywords (List[str]): List of keywords to search for in keys and/or values
+        mode (str): Matching mode ('match', 'contains', 'startswith', or 'endswith')
+        type (str): What to match ('all', 'key', or 'value')
+
+    Returns:
+        Dict[str, List[List[Union[str, int]]]]: Dictionary mapping keywords to their matched paths
+    """
     matches: Dict[str, List[List[Union[str, int]]]] = {}
     keyword_counts: Dict[str, int] = {k: 0 for k in keywords}
     matcher = get_matcher(mode)
+    prev_path: List[Union[str, int]] = []
 
     def get_key_with_extension(keyword: str) -> str:
         count = keyword_counts[keyword]
         keyword_counts[keyword] += 1
         return f"{keyword}_{count}" if count > 0 else keyword
 
-    def parse_prefix_to_path(prefix: str) -> List[Union[str, int]]:
-        path: List[Union[str, int]] = []
-        for part in prefix.split('.'):
-            # convert ijson 'item' into array index if numeric
-            if part == 'item':
-                if path and isinstance(path[-1], int):
-                    path[-1] += 1
-                else:
-                    path.append(0)
-            elif part.isdigit():
-                path.append(int(part))
-            else:
-                path.append(part)
-        return path
+    def visitor(item: Any, path: tuple):
+        nonlocal prev_path
+        path = list(path)
 
-    with open(file_path, 'rb') as f:
-        parser = ijson.parse(f)
+        # compute delta
+        i = 0
+        while i < len(path) and i < len(prev_path) and path[i] == prev_path[i]:
+            i += 1
+        delta = path[i:]
+        base_path = path[:i]
 
-        for prefix, event, value in parser:
-            path = parse_prefix_to_path(prefix)
-
-            if event == 'map_key':
-                if type in ['all', 'key']:
+        # only process unmatched suffix for keys
+        if type in ['all', 'key']:
+            for j, part in enumerate(delta):
+                if isinstance(part, str):
                     for keyword in keywords:
-                        if matcher(str(value), keyword):
+                        if matcher(part, keyword):
                             key = get_key_with_extension(keyword)
-                            matches.setdefault(key, []).append(path + [value])
-            elif event in ('string', 'number'):
-                if type in ['all', 'value']:
-                    for keyword in keywords:
-                        if matcher(str(value), keyword):
-                            key = get_key_with_extension(keyword)
-                            matches.setdefault(key, []).append(path)
+                            matches.setdefault(key, []).append(base_path + delta[:j+1])
+                            break
+                    else:
+                        continue
+                    break
+
+        # check value
+        if type in ['all', 'value'] and isinstance(item, (str, int, float)):
+            for keyword in keywords:
+                if matcher(str(item), keyword):
+                    key = get_key_with_extension(keyword)
+                    matches.setdefault(key, []).append(path)
+                    break
+
+        prev_path = path
+
+    with open(file_path, 'r') as f:
+        json_stream.visit(f, visitor)
 
     return matches
 
