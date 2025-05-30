@@ -2,57 +2,15 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>JSONX-Gen</title>
-  <style>
-    .input-group {
-      margin: 10px 0;
-    }
-    .input-group input, .input-group textarea {
-      width: 60%;
-      box-sizing: border-box;
-    }
-    .select-group {
-      margin: 10px 0;
-      display: flex;
-      gap: 20px;
-      align-items: flex-end;
-    }
-    .select-container {
-      display: flex;
-      flex-direction: column;
-    }
-    .select-container label {
-      font-size: 0.8em;
-      color: #666;
-      margin-bottom: 4px;
-    }
-    .select-container select {
-      min-width: 120px;
-    }
-    button {
-      padding: 5px 15px;
-      margin-left: 10px;
-    }
-    .toggle-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 10px 0;
-    }
-    .toggle-group label {
-      font-size: 0.8em;
-      color: #666;
-    }
-    .input-method {
-      display: none;
-    }
-    .input-method.active {
-      display: block;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSONx-Gen</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fira+Code&display=swap" rel="stylesheet">
 </head>
 <body>
-  <h2>JSONX-GEN</h2>
+  <h2>JSONxGen</h2>
   <p>Search JSON object for keywords and generate extraction code for all matching paths:</p>
 
   <div class="select-group">
@@ -110,11 +68,11 @@
 
   <div class="input-group">
     <input id="keywords" placeholder="comma,separated,keywords">
+    <button onclick="extract()">Generate</button>
   </div>
-  <button onclick="extract()">Generate</button>
 
   <h3>Result:</h3>
-  <pre id="result" style="background:#f4f4f4; padding:1em; border:1px solid #ccc;"></pre>
+  <pre id="result"></pre>
 
   <script>
     function toggleInputMethod() {

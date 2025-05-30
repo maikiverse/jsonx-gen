@@ -1,6 +1,0 @@
-- frontend: toggle text or filepath
-- handle parse from filepaths/ urls
-- filepath behavior local vs server
-- ijson support
-- pip package
-- fastapi optional dependency
