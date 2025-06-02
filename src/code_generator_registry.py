@@ -76,10 +76,10 @@ def generate_extraction_code_js(matches: Dict[str, List[List[Union[str, int]]]])
 def generate_extraction_code_mysql(matches: Dict[str, List[List[Union[str, int]]]]) -> str:
     """
     Generate MySQL code to extract fields from a JSON object based on extracted paths.
-    
+
     Args:
         matches (Dict[str, List[List[Union[str, int]]]]): Dictionary mapping keywords to their paths
-        
+
     Returns:
         str: MySQL code that extracts matching fields from the JSON object
     """
@@ -89,9 +89,11 @@ def generate_extraction_code_mysql(matches: Dict[str, List[List[Union[str, int]]
     ]
     for keyword, paths in matches.items():
         for path in paths:
-            path_str = "".join(f"->'$.{p}'" if isinstance(p, str) else f"->'$[{p}]'" for p in path)
-            lines.append(f"    JSON_EXTRACT(json_data, '{path_str}') AS {keyword},")
-    # Remove trailing comma from last line
+            json_path = '$' + ''.join(
+                f"[{p}]" if isinstance(p, int) else f".{p}" for p in path
+            )
+            lines.append(f"    JSON_UNQUOTE(JSON_EXTRACT(json_data, '{json_path}')) AS {keyword},")
+
     lines[-1] = lines[-1].rstrip(',')
     lines.append("FROM your_table;")
     return "\n".join(lines)
