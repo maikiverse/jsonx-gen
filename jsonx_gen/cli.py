@@ -16,19 +16,19 @@ Examples:
   Generate Python extraction code from a file (exact match):
     jsonxgen --keywords "name,email" --mode match data.json
 
-  Generate JavaScript extraction code from a JSON string (contains):
-    jsonxgen --keywords "name" --mode contains --language javascript '{"user": {"name": "John"}}'
-
-  Generate MongoDB extraction code from a file (match):
-    jsonxgen --keywords "name,email" --language mongodb --mode match data.json
+  Generate Python extraction code from a JSON string (contains):
+    jsonxgen --keywords "name" --mode contains '{"user": {"name": "John"}}'
 
   Generate MySQL extraction code from a file (starts with):
     jsonxgen --keywords "name,email" --language mysql --mode startswith data.json
 
   Generate Spark SQL extraction code from a JSON string (exact match):
-    jsonxgen --keywords "name" --language "spark_sql" '{"user": {"name": "John"}}'
+    jsonxgen --keywords "name" --language "spark sql" '{"user": {"name": "John"}}'
 
-
+  Generate code matching only keys (endswith):
+    jsonxgen --keywords "id" --mode endswith --type key data.json
+        """
+    )
     
     parser.add_argument(
         '--keywords',
@@ -50,7 +50,7 @@ Examples:
     parser.add_argument(
         '--language',
         default='python',
-        help='Target language for the extraction code. Supported languages: c#, c++, go, java, javascript, matlab, mongodb, mysql, php, postgresql, python, pyspark, r, ruby, rust, shell, spark_sql'
+        help='Target language for the extraction code (default: python)'
     )
     parser.add_argument(
         'json_input',

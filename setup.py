@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="jsonxgen",
+    name="jsonx_gen",
     version="0.1.0",
     packages=find_packages(),
     install_requires=[
@@ -13,7 +13,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'jsonxgen=src.cli:main',
+            'jsonx_gen=jsonx_gen.cli:main',
         ],
     },
     author="Your Name",
@@ -29,6 +29,6 @@ setup(
     ],
     python_requires=">=3.7",
     package_data={
-        'jsonxgen': ['py.typed'],
+        'jsonx_gen': ['py.typed'],
     },
 ) 

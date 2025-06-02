@@ -8,7 +8,7 @@ import json
 import logging
 import traceback
 
-from src.core import generate_extraction_code, parse_json_input
+from .core import generate_extraction_code, parse_json_input
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)

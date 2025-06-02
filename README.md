@@ -1,11 +1,11 @@
-# JSONXGen
+# JSONx-Gen
 
 A tool to generate extraction code from JSON schemas. It supports multiple programming languages and provides both a command-line interface and a REST API.
 
 ## Installation
 
 ```bash
-pip install jsonxgen
+pip install jsonx_gen
 ```
 
 ## Usage
