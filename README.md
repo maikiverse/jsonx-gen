@@ -1,6 +1,6 @@
 # JSONx-Gen
 
-A tool to search JSON objects for keywords and generate extraction code. It supports multiple programming languages and provides both a command-line interface and a webbrowser interface.
+A tool to search JSON objects for keywords and generate extraction code. It supports multiple programming languages and provides both a command-line interface and a browser interface.
 
 ## Installation
 
