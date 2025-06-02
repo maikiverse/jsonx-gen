@@ -1,6 +1,6 @@
 # JSONx-Gen
 
-A tool to generate extraction code from JSON schemas. It supports multiple programming languages and provides both a command-line interface and a REST API.
+A tool to search JSON objects for keywords and generate extraction code. It supports multiple programming languages and provides both a command-line interface and a webbrowser interface.
 
 ## Installation
 
