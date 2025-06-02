@@ -69,11 +69,23 @@ curl "http://localhost:8000/extract?file_path=https://api.example.com/data.json&
 
 ## Supported Languages
 
-- Python
+- C#
+- C++
+- Go
+- Java
+- JavaScript
+- MATLAB
+- MongoDB
 - MySQL
-- Spark SQL
 - PHP
+- PostgreSQL
+- Python
 - PySpark
+- R
+- Ruby
+- Rust
+- Shell
+- Spark SQL
 
 ## Features
 
