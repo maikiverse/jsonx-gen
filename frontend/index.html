@@ -67,18 +67,18 @@
 
   <div id="json-text-input" class="input-method active">
     <div class="input-group">
-      <textarea id="json" rows="12" placeholder="Paste your JSON here..."></textarea>
+      <textarea id="json" rows="12">{"paste":[{"your":"json"}, "here", "..."]}</textarea>
     </div>
   </div>
 
   <div id="json-file-input" class="input-method">
     <div class="input-group">
-      <input id="file-path" placeholder="Enter file path or URL...">
+      <input id="file-path" value="./example.json" placeholder="Enter file path or URL...">
     </div>
   </div>
 
   <div class="input-group">
-    <input id="keywords" placeholder="comma,separated,keywords">
+    <input id="keywords" value="enter, comma, separated, keywords, here">
     <button onclick="extract()">Generate</button>
   </div>
 
