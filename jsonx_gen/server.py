@@ -1,14 +1,25 @@
-from fastapi import FastAPI, Query, Request
-from pydantic import BaseModel
 from typing import List, Optional, Union, Dict, Any
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, JSONResponse
 from pathlib import Path
 import json
 import logging
 import traceback
-
 from .core import generate_extraction_code, parse_json_input
+
+try:
+    from fastapi import FastAPI, Query, Request
+    from fastapi.staticfiles import StaticFiles
+    from fastapi.responses import HTMLResponse, JSONResponse
+    from pydantic import BaseModel
+    WEB_AVAILABLE = True
+except ImportError:
+    WEB_AVAILABLE = False
+
+if not WEB_AVAILABLE:
+    raise ImportError(
+        "Web interface dependencies not installed. "
+        "Install them with: pip install jsonx_gen[web]"
+    )
+
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)

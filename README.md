@@ -1,6 +1,7 @@
 # JSONx-Gen
 
-A tool to search JSON objects/files for keywords and generate extraction code for all matching paths. It supports multiple programming languages and provides both a command-line interface and a web-based GUI.
+A tool to search a JSON object for keywords and generate extraction code to all matching paths.
+It supports multiple programming languages and provides both a command-line interface and a web-based GUI.
 
 ## Features
 
@@ -25,11 +26,53 @@ A tool to search JSON objects/files for keywords and generate extraction code fo
 
 ## Installation
 
+### Basic Installation (CLI only)
 ```bash
 pip install jsonx_gen
 ```
 
+### With Web Interface
+```bash
+pip install jsonx_gen[web]
+```
+
+
 ## Usage
+
+### Python Package Usage
+
+```python
+from jsonx_gen import extract_json_path, generate_extraction_code
+
+# Example JSON data
+json_data = {
+    "user": {
+        "name": "John Doe",
+        "email": "john@example.com",
+        "address": {
+            "street": "123 Main St",
+            "city": "Boston"
+        }
+    }
+}
+
+# Extract paths for matching keywords and values
+paths = extract_json_path(
+    json_data,
+    keywords=["name", "email"],
+    mode="match",  # Options: match, contains, startswith, endswith
+    type="all"     # Options: all, key, value
+)
+
+# Generate extraction code in JavaScript with URL input
+code = generate_extraction_code(
+    "https://api.example.com/data.json",
+    language="javascript",
+    mode="match",
+    type="all"
+)
+print(code)
+```
 
 ### Web Interface
 
@@ -46,20 +89,11 @@ Then open your browser at http://localhost:8000 to use the web interface.
 # Generate Python extraction code from a local file (exact match)
 jsonx_gen --keywords "name,email" --mode match data.json
 
-# Generate Python extraction code from a URL (contains)
-jsonx_gen --keywords "name" --mode contains "https://api.example.com/data.json"
+# Generate Spark SQL extraction code from a URL (contains)
+jsonx_gen --keywords "name" --language "spark_sql" --mode contains "https://api.example.com/data.json"
 
-# Generate Python extraction code from a JSON string (contains)
-jsonx_gen --keywords "name" --mode contains '{"user": {"name": "John"}}'
-
-# Generate MySQL extraction code from a URL (starts with)
-jsonx_gen --keywords "name,email" --language mysql --mode startswith "https://api.example.com/data.json"
-
-# Generate Spark SQL extraction code from a JSON string (exact match)
-jsonx_gen --keywords "name" --language "spark_sql" '{"user": {"name": "John"}}'
-
-# Generate code matching only keys (endswith)
-jsonx_gen --keywords "id" --mode endswith --type key data.json
+# Generate Java extraction code from a JSON string (startswith)
+jsonx_gen --keywords "name" --language "java" --mode startswith '{"user": {"name": "John"}}'
 ```
 
 ### REST API
@@ -110,11 +144,7 @@ curl "http://localhost:8000/extract?file_path=https://api.example.com/data.json&
 1. Clone the repository
 2. Install development dependencies:
    ```bash
-   pip install -e ".[dev]"
-   ```
-3. Run tests:
-   ```bash
-   pytest
+   pip install -e ".[web]"
    ```
 
 ## License
