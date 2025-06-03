@@ -86,7 +86,7 @@ print(code)
 
 Start the server:
 ```bash
-uvicorn jsonx_gen.server:app
+jsonx_gen_web
 ```
 
 Then open your browser at http://localhost:8000 to use the web interface.

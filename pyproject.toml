@@ -44,10 +44,11 @@ web = [
 Homepage = "https://github.com/maikiverse/jsonx-gen"
 Documentation = "https://github.com/maikiverse/jsonx-gen#readme"
 Source = "https://github.com/maikiverse/jsonx-gen"
-Bug Tracker = "https://github.com/maikiverse/jsonx-gen/issues"
+BugTracker = "https://github.com/maikiverse/jsonx-gen/issues"
 
 [project.scripts]
 jsonx_gen = "jsonx_gen.cli:main"
+jsonx_gen_web = "jsonx_gen.server:start"
 
 [tool.setuptools]
 package-data = { "jsonx_gen" = ["py.typed"] }

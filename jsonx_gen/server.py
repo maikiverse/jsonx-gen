@@ -150,3 +150,7 @@ async def extract_get(
             status_code=500,
             content={"error": f"Unexpected error: {str(e)}"}
         )
+
+def start():
+    import uvicorn
+    uvicorn.run("jsonx_gen.server:app", host="127.0.0.1", port=8000, reload=False)
