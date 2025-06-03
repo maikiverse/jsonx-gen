@@ -26,6 +26,13 @@ It supports multiple programming languages and provides both a command-line inte
 
 ## Installation
 
+# Install from source (latest)
+```bash
+git clone https://github.com/maikiverse/jsonx-gen
+cd jsonx-gen
+pip install -e .[web]
+```
+
 ### Basic Installation (CLI only)
 ```bash
 pip install jsonx_gen
