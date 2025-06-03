@@ -68,9 +68,9 @@ paths = extract_json_path(
 code = generate_extraction_code(
     json_input="https://api.example.com/data.json",
     keywords=["name", "email"],
-    language="javascript",
     mode="match",
-    type="all"
+    type="all",
+    target_language="javascript"
 )
 print(code)
 ```
