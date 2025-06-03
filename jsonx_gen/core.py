@@ -65,7 +65,15 @@ def extract_json_path(
                 search(v, path + [k])
         elif isinstance(obj, list):
             for idx, item in enumerate(obj):
-                search(item, path + [idx])
+                # match value and item is atomic
+                if type in ['all', 'value'] and isinstance(item, (str, int, float)):
+                    for keyword in keywords:
+                        if matcher(str(item), keyword):
+                            key = get_key_with_extension(keyword, keyword_counts)
+                            matches.setdefault(key, []).append(path + [idx])
+                else:
+                    # item is dict or list
+                    search(item, path + [idx])
 
     # Start the search from the root
     search(json_obj, [])
