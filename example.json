@@ -14,8 +14,8 @@
                     "phone": "123-456-7890"
                 }
             },
-            "keyword1_settings": {
-                "name": "keyword2",
+            "settings": {
+                "name": "Max",
                 "theme": "dark",
                 "notifications": true
             }

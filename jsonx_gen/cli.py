@@ -14,19 +14,19 @@ def main():
         epilog="""
 Examples:
   Generate Python extraction code from a file (exact match):
-    jsonxgen --keywords "name,email" --mode match data.json
+    jsonx_gen --keywords "name,email" --mode match data.json
 
   Generate Python extraction code from a JSON string (contains):
-    jsonxgen --keywords "name" --mode contains '{"user": {"name": "John"}}'
+    jsonx_gen --keywords "name" --mode contains '{"user": {"name": "John"}}'
 
   Generate MySQL extraction code from a file (starts with):
-    jsonxgen --keywords "name,email" --language mysql --mode startswith data.json
+    jsonx_gen --keywords "name,email" --language mysql --mode startswith data.json
 
   Generate Spark SQL extraction code from a JSON string (exact match):
-    jsonxgen --keywords "name" --language "spark sql" '{"user": {"name": "John"}}'
+    jsonx_gen --keywords "name" --language spark_sql '{"user": {"name": "John"}}'
 
   Generate code matching only keys (endswith):
-    jsonxgen --keywords "id" --mode endswith --type key data.json
+    jsonx_gen --keywords "id" --mode endswith --type key data.json
         """
     )
     

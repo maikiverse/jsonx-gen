@@ -66,7 +66,8 @@ paths = extract_json_path(
 
 # Generate extraction code in JavaScript with URL input
 code = generate_extraction_code(
-    "https://api.example.com/data.json",
+    json_input="https://api.example.com/data.json",
+    keywords=["name", "email"],
     language="javascript",
     mode="match",
     type="all"
@@ -78,7 +79,7 @@ print(code)
 
 Start the server:
 ```bash
-uvicorn jsonx_gen.server:app --reload
+uvicorn jsonx_gen.server:app
 ```
 
 Then open your browser at http://localhost:8000 to use the web interface.
@@ -90,10 +91,10 @@ Then open your browser at http://localhost:8000 to use the web interface.
 jsonx_gen --keywords "name,email" --mode match data.json
 
 # Generate Spark SQL extraction code from a URL (contains)
-jsonx_gen --keywords "name" --language "spark_sql" --mode contains "https://api.example.com/data.json"
+jsonx_gen --keywords "name" --language spark_sql --mode contains "https://api.example.com/data.json"
 
 # Generate Java extraction code from a JSON string (startswith)
-jsonx_gen --keywords "name" --language "java" --mode startswith '{"user": {"name": "John"}}'
+jsonx_gen --keywords "name" --language java --mode startswith '{"user": {"name": "John"}}'
 ```
 
 ### REST API
